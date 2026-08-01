@@ -11,6 +11,9 @@ export default function PlacementTestPage() {
   const [showResult, setShowResult] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  
+  // Track user answers by question ID
+  const [userAnswers, setUserAnswers] = useState({});
 
   const currentQuestion = placementTest[currentQuestionIndex];
 
@@ -20,10 +23,13 @@ export default function PlacementTestPage() {
   };
 
   const handleNext = () => {
+    // Save the user's answer
+    setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: selectedOption }));
+
     // Check answer
-    if (selectedOption === currentQuestion.correctAnswer) {
-      setScore(score + 1);
-    }
+    const isCorrect = selectedOption === currentQuestion.correctAnswer;
+    const newScore = isCorrect ? score + 1 : score;
+    setScore(newScore);
 
     if (currentQuestionIndex < placementTest.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -31,16 +37,14 @@ export default function PlacementTestPage() {
       setIsAnswered(false);
     } else {
       // Calculate final level
-      const finalScore = selectedOption === currentQuestion.correctAnswer ? score + 1 : score;
-      const level = calculateLevel(finalScore);
+      const level = calculateLevel(newScore);
       
       // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('toefl_level', level);
-        localStorage.setItem('placement_score', finalScore);
+        localStorage.setItem('placement_score', newScore);
       }
       
-      setScore(finalScore);
       setShowResult(true);
     }
   };
@@ -55,8 +59,8 @@ export default function PlacementTestPage() {
   if (showResult) {
     const level = calculateLevel(score);
     return (
-      <main className="container" style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
-        <div className="card" style={{ maxWidth: '600px', margin: '0 auto', padding: '3rem' }}>
+      <main className="container" style={{ padding: '4rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+        <div className="card" style={{ padding: '3rem', textAlign: 'center', marginBottom: '3rem' }}>
           <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Test Completed!</h1>
           <p style={{ fontSize: '1.25rem', marginBottom: '2rem', opacity: '0.8' }}>
             You scored {score} out of {placementTest.length}.
@@ -82,9 +86,119 @@ export default function PlacementTestPage() {
           <button 
             onClick={() => router.push('/dashboard')}
             className="btn btn-primary"
-            style={{ padding: '1rem 2rem', fontSize: '1.1rem', width: '100%' }}
+            style={{ padding: '1rem 2rem', fontSize: '1.1rem', width: '100%', maxWidth: '300px' }}
           >
             Go to Dashboard
+          </button>
+        </div>
+
+        {/* Review Section */}
+        <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Review Your Answers</h2>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {placementTest.map((q, idx) => {
+            const userAnswer = userAnswers[q.id];
+            const isCorrect = userAnswer === q.correctAnswer;
+
+            return (
+              <div key={q.id} className="card" style={{ padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: 'rgba(0,0,0,0.05)', 
+                    borderRadius: '20px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase'
+                  }}>
+                    {q.type} - Q{idx + 1}
+                  </span>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    backgroundColor: isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                    color: isCorrect ? 'var(--success)' : 'var(--error)',
+                    borderRadius: '20px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                  }}>
+                    {isCorrect ? 'Correct' : 'Incorrect'}
+                  </span>
+                </div>
+
+                {q.text && (
+                  <div style={{ 
+                    padding: '1rem', 
+                    backgroundColor: 'rgba(0,0,0,0.02)', 
+                    borderLeft: '4px solid var(--primary)',
+                    marginBottom: '1.5rem',
+                    lineHeight: '1.6',
+                    fontSize: '0.95rem'
+                  }}>
+                    {q.text}
+                  </div>
+                )}
+
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>{q.question}</h3>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {q.options.map((option, optIdx) => {
+                    const isSelected = userAnswer === optIdx;
+                    const isActualCorrect = q.correctAnswer === optIdx;
+                    
+                    let bg = 'transparent';
+                    let color = 'var(--foreground)';
+                    let border = '2px solid rgba(0,0,0,0.1)';
+
+                    if (isActualCorrect) {
+                      bg = 'rgba(16, 185, 129, 0.1)'; // Light Green
+                      border = '2px solid var(--success)';
+                      color = 'var(--success)';
+                    } else if (isSelected && !isActualCorrect) {
+                      bg = 'rgba(239, 68, 68, 0.1)'; // Light Red
+                      border = '2px solid var(--error)';
+                      color = 'var(--error)';
+                    }
+
+                    return (
+                      <div
+                        key={optIdx}
+                        style={{
+                          padding: '1rem',
+                          backgroundColor: bg,
+                          color: color,
+                          border: border,
+                          borderRadius: '6px',
+                          fontSize: '1rem',
+                          fontWeight: isSelected || isActualCorrect ? '500' : '400'
+                        }}
+                      >
+                        {option}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ 
+                  marginTop: '1.5rem', 
+                  padding: '1rem', 
+                  backgroundColor: 'rgba(0,0,0,0.03)', 
+                  borderRadius: '6px',
+                }}>
+                  <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Explanation:</p>
+                  <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>{q.explanation}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+          <button 
+            onClick={() => router.push('/dashboard')}
+            className="btn btn-primary"
+            style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}
+          >
+            Back to Dashboard
           </button>
         </div>
       </main>
