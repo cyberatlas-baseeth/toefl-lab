@@ -37,7 +37,7 @@ export default function Home() {
               A smart way to elevate your English proficiency and achieve your target TOEFL score.
             </p>
             <div>
-              <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1rem' }}>
+              <Link href="/dashboard" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1rem' }}>
                 Start Practice
               </Link>
             </div>

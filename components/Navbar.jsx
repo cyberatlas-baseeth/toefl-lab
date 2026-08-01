@@ -13,7 +13,7 @@ export default function Navbar() {
           <Link href="/speaking" className="nav-link">Speaking</Link>
           <Link href="/writing" className="nav-link">Writing</Link>
           <Link href="/vocabulary" className="nav-link">Vocab</Link>
-          <Link href="/login" className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', borderRadius: '0' }}>Get Started</Link>
+          <Link href="/dashboard" className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', borderRadius: '0' }}>Get Started</Link>
         </div>
       </div>
     </nav>
