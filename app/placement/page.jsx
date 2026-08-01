@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { placementTest } from '@/lib/data';
 
-export default function PlacementTestPage() {
+function PlacementTestContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -14,6 +15,19 @@ export default function PlacementTestPage() {
   
   // Track user answers by question ID
   const [userAnswers, setUserAnswers] = useState({});
+
+  useEffect(() => {
+    // Check if we're in review mode
+    if (searchParams.get('review') === 'true' && typeof window !== 'undefined') {
+      const storedAnswers = localStorage.getItem('placement_answers');
+      const storedScore = localStorage.getItem('placement_score');
+      if (storedAnswers && storedScore) {
+        setUserAnswers(JSON.parse(storedAnswers));
+        setScore(parseInt(storedScore));
+        setShowResult(true);
+      }
+    }
+  }, [searchParams]);
 
   const currentQuestion = placementTest[currentQuestionIndex];
 
@@ -41,8 +55,10 @@ export default function PlacementTestPage() {
       
       // Save to localStorage
       if (typeof window !== 'undefined') {
+        const finalAnswers = { ...userAnswers, [currentQuestion.id]: selectedOption };
         localStorage.setItem('toefl_level', level);
         localStorage.setItem('placement_score', newScore);
+        localStorage.setItem('placement_answers', JSON.stringify(finalAnswers));
       }
       
       setShowResult(true);
@@ -295,5 +311,13 @@ export default function PlacementTestPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+export default function PlacementTestPage() {
+  return (
+    <Suspense fallback={<div className="container" style={{ padding: '4rem', textAlign: 'center' }}>Loading...</div>}>
+      <PlacementTestContent />
+    </Suspense>
   );
 }

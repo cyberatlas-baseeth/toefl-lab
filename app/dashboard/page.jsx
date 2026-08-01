@@ -41,10 +41,13 @@ export default function DashboardPage() {
         </div>
         
         {level ? (
-          <div style={{ textAlign: 'right', backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', padding: '1rem 2rem', borderRadius: '8px' }}>
+          <div style={{ textAlign: 'right', backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', padding: '1.5rem 2rem', borderRadius: '8px' }}>
             <p style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', opacity: '0.8' }}>Estimated Level</p>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{level}</p>
-            <p style={{ fontSize: '0.8rem', opacity: '0.7' }}>Placement Score: {score}/20</p>
+            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: '0.2rem 0' }}>{level}</p>
+            <p style={{ fontSize: '0.9rem', opacity: '0.7', marginBottom: '1rem' }}>Placement Score: {score}/20</p>
+            <Link href="/placement?review=true" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', width: '100%' }}>
+              Review Test
+            </Link>
           </div>
         ) : (
           <Link href="/placement" className="btn btn-primary" style={{ padding: '1rem 2rem' }}>
